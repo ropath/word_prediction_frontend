@@ -22,7 +22,7 @@ def main():
 
     if run:
         # Open the webcam using the provided stream URI
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(1)
         if not cap.isOpened():
             st.error("Error: Could not open video stream.")
             return
