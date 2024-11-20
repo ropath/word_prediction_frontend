@@ -4,7 +4,6 @@ import requests
 import base64
 import time
 from PIL import Image
-import numpy as np
 
 # URL of the FastAPI endpoint
 api_url = "https://word-interpreter-app-373962339093.europe-west1.run.app/predict_word"
