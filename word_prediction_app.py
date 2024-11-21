@@ -3,12 +3,12 @@ import cv2
 import requests
 import base64
 import time
-from streamlit_webrtc import webrtc_streamer, WebRtcMode, VideoProcessorBase
+from streamlit_webrtc import webrtc_streamer, WebRtcMode, VideoProcessorBase, RTCConfiguration
 import numpy as np
 import av
 
 # URL of the FastAPI endpoint (Update with a public IP or URL)
-api_url = "https://your-fastapi-endpoint.com/predict_word"
+api_url = "https://word-interpreter-app-373962339093.europe-west1.run.app/predict_word"
 
 # Define VideoProcessor for frame processing
 class SignLanguageProcessor(VideoProcessorBase):
@@ -53,10 +53,16 @@ class SignLanguageProcessor(VideoProcessorBase):
 def main():
     st.title("Real-time Sign Language Prediction with Webcam")
 
+    # WebRTC configuration to improve connectivity
+    rtc_configuration = RTCConfiguration({
+        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+    })
+
     # WebRTC streamer to access the webcam with VideoProcessor
     webrtc_ctx = webrtc_streamer(
         key="sign_language_prediction",
         mode=WebRtcMode.SENDRECV,  # SENDRECV mode to access the camera and receive processed frames
+        rtc_configuration=rtc_configuration,  # Use RTC configuration for better connectivity
         video_processor_factory=SignLanguageProcessor,
         media_stream_constraints={
             "video": True,
