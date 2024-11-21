@@ -38,7 +38,7 @@ def main():
         while True:
             ret, frame = cap.read()
             if not ret:
-                st.info("End of video file.")
+                st.info("Video file uploaded...relax and wait for prediction.")
                 break
 
             # Resize the frame to reduce size
