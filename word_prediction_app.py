@@ -18,7 +18,7 @@ class SignLanguageProcessor(VideoProcessorBase):
         self.result_text = ""
         self.progress = 0
         self.last_sent_time = 0
-        self.frame_interval = 1.0  # Minimum interval between frames to send (in seconds)
+        self.frame_interval = 0.5  # Reduced interval between frames to send (in seconds)
 
     def recv(self, frame: av.VideoFrame) -> av.VideoFrame:
         current_time = time.time()
@@ -39,7 +39,7 @@ class SignLanguageProcessor(VideoProcessorBase):
             if response.status_code == 200:
                 result = response.json()
                 self.result_text = f"Prediction: {result['prediction']}, Confidence: {result['confidence']:.2f}%"
-
+                
                 # Update progress bar if prediction is in progress
                 if result['prediction'] == "collecting frames for prediction...":
                     self.progress = min(self.progress + 1, 100)
@@ -64,7 +64,11 @@ def main():
         mode=WebRtcMode.SENDRECV,  # SENDRECV mode to access the camera and receive processed frames
         video_processor_factory=SignLanguageProcessor,
         media_stream_constraints={
-            "video": True,  # Enable video stream
+            "video": {
+                "width": {"min": 640, "ideal": 640, "max": 1280},
+                "height": {"min": 480, "ideal": 480, "max": 720},
+                "frameRate": {"ideal": 15, "max": 30}
+            },
             "audio": False,  # Disable audio stream
         },
     )
