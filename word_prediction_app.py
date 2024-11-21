@@ -75,7 +75,7 @@ def main():
                 if 'gif' in result:
                     gif_base64 = result['gif']
                     gif_bytes = base64.b64decode(gif_base64)
-                    gif_placeholder.image(gif_bytes, format="GIF")
+                    gif_placeholder.image(gif_bytes)#, format="GIF")
                 st.success(prediction_text)
             else:
                 st.error(f"Error: Received status code {response.status_code}")
