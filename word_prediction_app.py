@@ -42,7 +42,7 @@ def main():
                 break
 
             # Resize the frame to reduce size
-            frame = cv2.resize(frame, (640, 480))
+            frame = cv2.resize(frame, (320, 240))
 
             # Convert frame to JPEG format and encode it to base64
             _, buffer = cv2.imencode('.jpg', frame)
