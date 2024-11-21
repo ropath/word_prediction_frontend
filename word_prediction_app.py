@@ -63,7 +63,7 @@ def main():
             if len(frame_buffer) >= 10:
                 for buffered_frame in frame_buffer:
                     placeholder.image(buffered_frame)
-                    time.sleep(0.02)  # Adjust as needed for smoother playback
+                    #time.sleep(0.02)  # Adjust as needed for smoother playback
                 frame_buffer = []
 
             # Update the progress bar
@@ -73,7 +73,7 @@ def main():
         # Display remaining buffered frames
         for buffered_frame in frame_buffer:
             placeholder.image(buffered_frame)
-            time.sleep(0.2)
+            #time.sleep(0.2)
 
         # Send all frames to the API at once
         payload = {"frames": frames_base64}
