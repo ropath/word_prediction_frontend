@@ -78,13 +78,14 @@ def main():
     progress_bar = st.progress(0)
 
     # Use callbacks to display prediction results
-    if webrtc_ctx.video_processor:
+    if webrtc_ctx and webrtc_ctx.state is not None and webrtc_ctx.video_processor:
         while webrtc_ctx.state.playing:
             # Update prediction text
-            result_placeholder.text(webrtc_ctx.video_processor.result_text)
+            if webrtc_ctx.video_processor:
+                result_placeholder.text(webrtc_ctx.video_processor.result_text)
 
-            # Update the progress bar
-            progress_bar.progress(webrtc_ctx.video_processor.progress / 100)
+                # Update the progress bar
+                progress_bar.progress(webrtc_ctx.video_processor.progress / 100)
 
             # Add a small delay to prevent overwhelming the interface
             time.sleep(0.1)
@@ -101,3 +102,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
