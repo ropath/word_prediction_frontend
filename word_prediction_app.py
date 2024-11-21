@@ -60,7 +60,7 @@ def main():
 
         # Create GIF from the frames
         gif_path = tempfile.NamedTemporaryFile(delete=False, suffix=".gif").name
-        frames[0].save(gif_path, save_all=True, append_images=frames[1:], loop=0, duration=50)
+        frames[0].save(gif_path, save_all=True, append_images=frames[1:], loop=0, duration=30)
         gif_placeholder.image(gif_path)
 
         # Send all frames to the API at once
