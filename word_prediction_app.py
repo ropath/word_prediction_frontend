@@ -9,6 +9,23 @@ from PIL import Image
 # URL of the FastAPI endpoint
 api_url = "https://word-interpreter-app-373962339093.europe-west1.run.app/predict_word"
 
+def send_frames_in_batches(frames_base64, batch_size=10):
+    results = []
+    total_batches = (len(frames_base64) + batch_size - 1) // batch_size
+    for i in range(total_batches):
+        batch_frames = frames_base64[i * batch_size:(i + 1) * batch_size]
+        payload = {"frames": batch_frames}
+        try:
+            response = requests.post(api_url, json=payload)
+            if response.status_code == 200:
+                result = response.json()
+                results.append(result)
+            else:
+                st.error(f"Error: Received status code {response.status_code} for batch {i+1}")
+        except Exception as e:
+            st.error(f"Error: {e} for batch {i+1}")
+    return results
+
 def main():
     st.title("Sign Language Prediction from Uploaded Video")
     st.text("Upload a video file to start predictions.")
@@ -49,33 +66,27 @@ def main():
             # Display the frame in Streamlit
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             img_pil = Image.fromarray(frame_rgb)
-            placeholder.image(img_pil)
+            placeholder.image(img_pil, use_container_width=True)
 
             # Update the progress bar
             progress += 1
             progress_bar.progress(progress / total_frames)
 
-             # Add delay to control the rate of requests to avoid overwhelming the backend
-            time.sleep(0.5)
 
-        # Send all frames to the API at once
-        payload = {"frames": frames_base64}
-        try:
-            response = requests.post(api_url, json=payload)
-            if response.status_code == 200:
-                result = response.json()
+        # Send frames to the API in batches
+        results = send_frames_in_batches(frames_base64, batch_size=10)
+
+        # Display the results
+        for result in results:
+            if 'prediction' in result and 'confidence' in result:
                 prediction_text = f"Prediction: {result['prediction']}, Confidence: {result['confidence']:.2f}%"
-
-                # Check if GIF is included in the response
-                if 'gif' in result:
-                    gif_base64 = result['gif']
-                    gif_bytes = base64.b64decode(gif_base64)
-                    gif_placeholder.image(gif_bytes)
                 st.success(prediction_text)
-            else:
-                st.error(f"Error: Received status code {response.status_code}")
-        except Exception as e:
-            st.error(f"Error: {e}")
+
+            # Check if GIF is included in the response
+            if 'gif' in result:
+                gif_base64 = result['gif']
+                gif_bytes = base64.b64decode(gif_base64)
+                gif_placeholder.image(gif_bytes)
 
         # Release the video resource
         cap.release()
