@@ -34,7 +34,6 @@ def main():
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         frames_base64 = []
         frame_buffer = []
-        skip_rate = 2  # Skip every 2 frames to reduce load
 
         # Read all frames from the video
         while True:
@@ -42,10 +41,6 @@ def main():
             if not ret:
                 st.info("End of video file.")
                 break
-
-            # Skip frames to reduce processing load
-            if int(cap.get(cv2.CAP_PROP_POS_FRAMES)) % skip_rate != 0:
-                continue
 
             # Resize the frame to reduce size
             frame = cv2.resize(frame, (320, 240))
@@ -55,25 +50,25 @@ def main():
             frame_base64 = base64.b64encode(buffer).decode('utf-8')
             frames_base64.append(frame_base64)
 
-            # Buffer frames to reduce update frequency
+            # Add frame to buffer for batch display
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             frame_buffer.append(Image.fromarray(frame_rgb))
 
-            # Update the placeholder every 10 frames to reduce load
+            # Display buffered frames every 10 frames to reduce load
             if len(frame_buffer) >= 10:
                 for buffered_frame in frame_buffer:
-                    placeholder.image(buffered_frame)
-                    #time.sleep(0.02)  # Adjust as needed for smoother playback
+                    placeholder.image(buffered_frame, use_container_width=True)
+                    time.sleep(0.01)  # Reduced delay for smoother playback
                 frame_buffer = []
 
             # Update the progress bar
             progress += 1
             progress_bar.progress(progress / total_frames)
 
-        # Display remaining buffered frames
+        # Display any remaining buffered frames
         for buffered_frame in frame_buffer:
-            placeholder.image(buffered_frame)
-            #time.sleep(0.2)
+            placeholder.image(buffered_frame, use_container_width=True)
+            time.sleep(0.01)
 
         # Send all frames to the API at once
         payload = {"frames": frames_base64}
@@ -99,5 +94,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
