@@ -5,42 +5,38 @@ import base64
 import time
 import tempfile
 from PIL import Image
-import numpy as np
 
 # URL of the FastAPI endpoint
 api_url = "https://word-interpreter-app-373962339093.europe-west1.run.app/predict_word"
 
 def main():
-    st.title("Sign Language Prediction from Video Upload")
-    st.text("Upload a short video clip for sign language prediction.")
+    st.title("Sign Language Prediction from Uploaded Video")
+    st.text("Upload a video file to start predictions.")
 
-    # File uploader for video
-    uploaded_video = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi", "mkv"])
-    
-    if uploaded_video is not None:
-        # Save the uploaded video to a temporary file
+    # File uploader to upload video
+    uploaded_file = st.file_uploader("Upload a video", type=["mp4", "avi", "mov", "mkv"])
+    placeholder = st.empty()
+    gif_placeholder = st.empty()
+    progress_bar = st.progress(0)
+
+    if uploaded_file is not None:
+        # Save uploaded video to a temporary file
         tfile = tempfile.NamedTemporaryFile(delete=False)
-        tfile.write(uploaded_video.read())
-        
+        tfile.write(uploaded_file.read())
+
         # Open the video file using OpenCV
         cap = cv2.VideoCapture(tfile.name)
         if not cap.isOpened():
             st.error("Error: Could not open video file.")
             return
 
-        # Display the uploaded video
-        st.video(uploaded_video)
-
-        placeholder = st.empty()
-        gif_placeholder = st.empty()
-        progress_bar = st.progress(0)
-
-        frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         progress = 0
+        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
         while True:
             ret, frame = cap.read()
             if not ret:
+                st.info("End of video file.")
                 break
 
             # Convert frame to JPEG format and encode it to base64
@@ -70,18 +66,20 @@ def main():
             # Display the frame in Streamlit
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             img_pil = Image.fromarray(frame_rgb)
-            placeholder.image(img_pil)
+            placeholder.image(img_pil, use_container_width=True)
 
-            # Update the progress bar
-            progress += 1
-            progress_bar.progress(progress / frame_count)
+            # Update the progress bar while collecting frames for prediction
+            progress = min(progress + 1, total_frames)
+            progress_bar.progress(progress / total_frames)
+
+            # Display the prediction result
+            st.success(prediction_text)
 
             # Add delay to control the rate of requests to avoid overwhelming the backend
-            time.sleep(0.05)
+            time.sleep(0.001)
 
         # Release the video resource
         cap.release()
-        st.success("Video processing complete.")
 
 if __name__ == "__main__":
     main()
