@@ -57,6 +57,7 @@ def main():
             # Update the progress bar
             progress += 1
             progress_bar.progress(progress / total_frames)
+            time.sleep(0.02)
 
         # Send all frames to the API at once
         payload = {"frames": frames_base64}
