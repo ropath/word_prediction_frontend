@@ -7,7 +7,7 @@ import tempfile
 from PIL import Image
 
 # URL of the FastAPI endpoint
-api_url = "http://127.0.0.1:8000/predict_word"
+api_url = "https://word-interpreter-app-373962339093.europe-west1.run.app/predict_word"
 
 def main():
     st.title("Sign Language Prediction from Uploaded Video")
