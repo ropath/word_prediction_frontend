@@ -52,7 +52,7 @@ def main():
             # Display the frame in Streamlit
             frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             img_pil = Image.fromarray(frame_rgb)
-            placeholder.image(img_pil, use_container_width=True)
+            placeholder.image(img_pil)
 
             # Update the progress bar
             progress += 1
