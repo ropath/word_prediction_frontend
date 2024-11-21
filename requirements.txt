@@ -3,4 +3,6 @@ requests==2.32.3
 imageio==2.36.0
 pillow==10.4.0
 streamlit_webrtc
+numpy
+av
 opencv-python
