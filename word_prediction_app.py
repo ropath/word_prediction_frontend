@@ -4,7 +4,6 @@ import requests
 import base64
 import time
 import tempfile
-import threading
 from PIL import Image
 
 # URL of the FastAPI endpoint
@@ -35,31 +34,7 @@ def main():
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         frames_base64 = []
 
-        def stream_data():
-            """Function to stream data to the API."""
-            payload = {"frames": frames_base64}
-            try:
-                response = requests.post(api_url, json=payload)
-                if response.status_code == 200:
-                    result = response.json()
-                    prediction_text = f"Prediction: {result['prediction']}, Confidence: {result['confidence']:.2f}%"
-
-                    # Check if GIF is included in the response
-                    if 'gif' in result:
-                        gif_base64 = result['gif']
-                        gif_bytes = base64.b64decode(gif_base64)
-                        gif_placeholder.image(gif_bytes)
-                    st.success(prediction_text)
-                else:
-                    st.error(f"Error: Received status code {response.status_code}")
-            except Exception as e:
-                st.error(f"Error: {e}")
-
-        # Start a new thread for streaming data to the API
-        streaming_thread = threading.Thread(target=stream_data)
-        streaming_thread.start()
-
-        # Read all frames from the video for playback
+        # Read all frames from the video
         while True:
             ret, frame = cap.read()
             if not ret:
@@ -84,11 +59,27 @@ def main():
             progress_bar.progress(progress / total_frames)
             time.sleep(0.02)
 
+        # Send all frames to the API at once
+        payload = {"frames": frames_base64}
+        try:
+            response = requests.post(api_url, json=payload)
+            if response.status_code == 200:
+                result = response.json()
+                prediction_text = f"Prediction: {result['prediction']}, Confidence: {result['confidence']:.2f}%"
+
+                # Check if GIF is included in the response
+                if 'gif' in result:
+                    gif_base64 = result['gif']
+                    gif_bytes = base64.b64decode(gif_base64)
+                    gif_placeholder.image(gif_bytes)
+                st.success(prediction_text)
+            else:
+                st.error(f"Error: Received status code {response.status_code}")
+        except Exception as e:
+            st.error(f"Error: {e}")
+
         # Release the video resource
         cap.release()
-
-        # Wait for the streaming thread to finish
-        streaming_thread.join()
 
 if __name__ == "__main__":
     main()
