@@ -56,7 +56,7 @@ def main():
             progress_bar.progress(progress / total_frames)
 
              # Add delay to control the rate of requests to avoid overwhelming the backend
-            time.sleep(0.01)
+            time.sleep(0.1)
 
         # Send all frames to the API at once
         payload = {"frames": frames_base64}
