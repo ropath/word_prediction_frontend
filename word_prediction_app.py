@@ -4,8 +4,8 @@ import requests
 import base64
 import time
 import tempfile
-from PIL import Image
 import threading
+from PIL import Image
 
 # URL of the FastAPI endpoint
 api_url = "https://word-interpreter-app-373962339093.europe-west1.run.app/predict_word"
@@ -35,43 +35,8 @@ def main():
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         frames_base64 = []
 
-        def process_video():
-            nonlocal progress
-            # Read all frames from the video
-            while True:
-                ret, frame = cap.read()
-                if not ret:
-                    st.info("End of video file.")
-                    break
-
-                # Resize the frame to reduce size
-                frame = cv2.resize(frame, (320, 240))
-
-                # Convert frame to JPEG format and encode it to base64
-                _, buffer = cv2.imencode('.jpg', frame)
-                frame_base64 = base64.b64encode(buffer).decode('utf-8')
-                frames_base64.append(frame_base64)
-
-                # Display the frame in Streamlit
-                frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                img_pil = Image.fromarray(frame_rgb)
-                placeholder.image(img_pil)# use_column_width=True)
-
-                # Update the progress bar
-                progress += 1
-                progress_bar.progress(progress / total_frames)
-                time.sleep(0.02)
-
-            # Release the video resource
-            cap.release()
-
-        # Start the video processing in a separate thread
-        video_thread = threading.Thread(target=process_video)
-        video_thread.start()
-
-        # Send all frames to the API after the video processing is complete
-        def send_to_api():
-            video_thread.join()
+        def stream_data():
+            """Function to stream data to the API."""
             payload = {"frames": frames_base64}
             try:
                 response = requests.post(api_url, json=payload)
@@ -90,9 +55,40 @@ def main():
             except Exception as e:
                 st.error(f"Error: {e}")
 
-        # Start sending data to the API in a separate thread
-        api_thread = threading.Thread(target=send_to_api)
-        api_thread.start()
+        # Start a new thread for streaming data to the API
+        streaming_thread = threading.Thread(target=stream_data)
+        streaming_thread.start()
+
+        # Read all frames from the video for playback
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                st.info("End of video file.")
+                break
+
+            # Resize the frame to reduce size
+            frame = cv2.resize(frame, (320, 240))
+
+            # Convert frame to JPEG format and encode it to base64
+            _, buffer = cv2.imencode('.jpg', frame)
+            frame_base64 = base64.b64encode(buffer).decode('utf-8')
+            frames_base64.append(frame_base64)
+
+            # Display the frame in Streamlit
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            img_pil = Image.fromarray(frame_rgb)
+            placeholder.image(img_pil)
+
+            # Update the progress bar
+            progress += 1
+            progress_bar.progress(progress / total_frames)
+            time.sleep(0.02)
+
+        # Release the video resource
+        cap.release()
+
+        # Wait for the streaming thread to finish
+        streaming_thread.join()
 
 if __name__ == "__main__":
     main()
