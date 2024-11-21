@@ -72,7 +72,7 @@ def main():
 
         # Display remaining buffered frames
         for buffered_frame in frame_buffer:
-            placeholder.image(buffered_frame, use_container_width=True)
+            placeholder.image(buffered_frame)
             time.sleep(0.02)
 
         # Send all frames to the API at once
