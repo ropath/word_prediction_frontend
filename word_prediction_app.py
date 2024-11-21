@@ -57,7 +57,7 @@ def main():
             # Display buffered frames every 10 frames to reduce load
             if len(frame_buffer) >= 10:
                 for buffered_frame in frame_buffer:
-                    placeholder.image(buffered_frame, use_container_width=True)
+                    placeholder.image(buffered_frame)#, use_container_width=True)
                     time.sleep(0.01)  # Reduced delay for smoother playback
                 frame_buffer = []
 
@@ -67,7 +67,7 @@ def main():
 
         # Display any remaining buffered frames
         for buffered_frame in frame_buffer:
-            placeholder.image(buffered_frame, use_container_width=True)
+            placeholder.image(buffered_frame)#, use_container_width=True)
             time.sleep(0.01)
 
         # Send all frames to the API at once
