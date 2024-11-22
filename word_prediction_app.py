@@ -56,7 +56,7 @@ def main():
             # Update the progress bar
             progress += 1
             progress_bar.progress(progress / total_frames)
-            time.sleep(0.02)
+            #time.sleep(0.02)
 
         # Create GIF from the frames
         gif_path = tempfile.NamedTemporaryFile(delete=False, suffix=".gif").name
